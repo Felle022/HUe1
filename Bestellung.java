@@ -12,8 +12,8 @@ public class Bestellung {
 		try {
 			Statement stmt = c.createStatement();
 			String sql = "create table if not exists " + tableName +		// in Zukunft keine ID einbauen(KundenID&ArtikelID zum PrimaryKey machen)
-			" (id integer primary key auto_increment, kundeID integer, " +
-			"artikelID integer, anzahl integer, foreign key (kundeID) " +
+			" (id integer primary key auto_increment, kundeID int, " +
+			"artikelID int, anzahl int, foreign key (kundeID) " +
 			"references Kunde (id), foreign key (artikelID) references " +
 			"Artikel (id));";
 			System.out.println("Tabelle " + tableName + " wurde erstellt.");
@@ -48,34 +48,53 @@ public class Bestellung {
 		try {
 			
 			Statement stmt = c.createStatement();
+			String sql="select kundeID from Bestellung where id = " + id + ";";
+			//System.out.println(sql);
 			
-			ResultSet rs = stmt.executeQuery("select kundeID from Bestellung where id = " + id + ";");
-			int xKunde = rs.getInt("kundeID");
+			ResultSet rs = stmt.executeQuery(sql);
+			int xKunde = 0;
+			while (rs.next())
+		      {
+			xKunde = rs.getInt("kundeID");
+		      }
 			rs.close();
-			
+		    
 			ResultSet rs2 = stmt.executeQuery("select artikelID from Bestellung where id = " + id + ";");
-			int xArtikel = rs2.getInt("artikelID");
-			
+			int xArtikel=0;
+			while(rs2.next())
+			{
+			xArtikel = rs2.getInt("artikelID");
+			}
 			rs2.close();
+			
+			String strBezeichnung="";
 			ResultSet rs3 = stmt.executeQuery("select bezeichnung from Artikel where id = " + xArtikel + ";");
-			String strBezeichnung = rs3.getString("bezeichnung");
+			while(rs3.next()) {
+			strBezeichnung = rs3.getString("bezeichnung");
+			}
 			rs3.close();
+			
+			String strName="";
 			ResultSet rs4 = stmt.executeQuery("select name from Kunde where id = " + xKunde + ";");
-			String strName = rs4.getString("name");
+			while(rs4.next()) {
+			strName = rs4.getString("name");
+			}
 			rs4.close();
 			
+			int stranzahl=0;
 			ResultSet rs5 =stmt.executeQuery("select anzahl from Bestellung where id = " + id + ";");
-			int stranzahl = rs5.getInt("anzahl");
+			while(rs5.next()) {
+			stranzahl = rs5.getInt("anzahl");
+			}
 			rs5.close();
 			
+			int lagerbestand=0;
 			ResultSet rs6 = stmt.executeQuery("select lagerbestand from Artikel where id = " +xArtikel  + ";");
-			int lagerbestand = rs6.getInt("lagerbestand");
-			//System.out.println(lagerbestand);
+			while(rs6.next()) {
+			lagerbestand = rs6.getInt("lagerbestand"); //System.out.println(lagerbestand);
+			}
 			rs6.close();
 			
-			ResultSet rs7 = stmt.executeQuery("select anzahl from Bestellung where id = " +id  + ";");
-			int anzahl = rs7.getInt("anzahl");
-			rs7.close();
 			System.out.println("\n");
 			System.out.println("Bestellung " + id + ":\nName: " + strName + "\nBezeichnung: " + strBezeichnung+"\nAnzahl:"+stranzahl+"");
 			System.out.println();
@@ -113,15 +132,24 @@ public class Bestellung {
 		try {
 			Statement stmt = c.createStatement();
 			ResultSet rs=stmt.executeQuery("select anzahl from Bestellung where id="+id+";");//Anzahl vor dem update wird berechnet
-			int anzahlAlt=rs.getInt("anzahl");
+			int anzahlAlt=0;
+			while(rs.next()){
+			anzahlAlt=rs.getInt("anzahl");
+			}
 			rs.close();
 			
+			int artikelIdalt=0;
 			ResultSet rs1= stmt.executeQuery("select artikelid from Bestellung where id="+id+";");// Die Artikelid vor dem Update wird gespeichert
-			int artikelIdalt=rs1.getInt("artikelid");
-			rs.close();
+			while(rs1.next()) {
+			artikelIdalt=rs1.getInt("artikelid");
+			}
+			rs1.close();
 			
+			int lagerbestand=0;
 			ResultSet l= stmt.executeQuery("select lagerbestand from Artikel where id="+artikelIdalt+";");
-			int lagerbestand= l.getInt("lagerbestand");
+			while(l.next()) {
+			lagerbestand= l.getInt("lagerbestand");
+			}
 			l.close();
 			
 			String update= "update Artikel set lagerbestand=("+lagerbestand+"+"+anzahlAlt+") where id="+artikelIdalt+";";
